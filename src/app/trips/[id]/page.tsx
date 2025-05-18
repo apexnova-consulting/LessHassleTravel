@@ -1,5 +1,6 @@
 'use client'
 
+/* eslint-disable react/no-unescaped-entities */
 import { notFound } from 'next/navigation'
 import type { TripPlan } from '@/types/trip'
 import { useState, useEffect } from 'react'
@@ -280,15 +281,9 @@ export default function TripDetailsPage({
                             <div>
                               <p className="text-sm font-medium text-gray-900">
                                 {day.transportation.mode} from {day.transportation.from} to{' '}
-                                {day.transportation.to}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {day.transportation.duration} hours
+                                {day.transportation.to} ({day.transportation.duration} hours) - <span className="cost">${day.transportation.cost}</span>
                               </p>
                             </div>
-                            <p className="text-sm font-medium text-gray-900">
-                              ${day.transportation.cost}
-                            </p>
                           </div>
                         </div>
                       </div>
