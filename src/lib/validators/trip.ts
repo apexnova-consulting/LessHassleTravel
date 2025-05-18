@@ -20,7 +20,7 @@ export const destinationSchema = z.object({
 
 export const tripPreferencesSchema = z.object({
   totalBudget: z.number().min(1, 'Budget must be greater than 0'),
-  currency: z.string().min(1, 'Currency is required'),
+  currency: z.string().default('USD').optional(),
   startDate: z.date(),
   endDate: z.date(),
   travelers: z.object({

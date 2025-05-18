@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
+  RectangleGroupIcon
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'How It Works', href: '/how-it-works' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Blog', href: '/blog' },
+  { name: 'Dashboard', href: '/dashboard' },
   { name: 'Contact', href: '/contact' },
 ]
 

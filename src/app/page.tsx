@@ -62,11 +62,6 @@ const testimonials = [
 export default function Home() {
   return (
     <div className="relative isolate bg-white">
-      {/* Test banner to verify Tailwind is working */}
-      <div className="bg-primary-600 text-white text-center py-2 font-bold">
-        If you can see this banner in blue with white text, Tailwind CSS is working properly!
-      </div>
-      
       {/* Hero section */}
       <div className="relative pt-14">
         <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">

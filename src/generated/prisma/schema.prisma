@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Models for Less Hassle Travel application
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String // In production, this would be hashed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trips     Trip[]
+}
+
+model Trip {
+  id           String          @id @default(uuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id])
+  title        String
+  totalBudget  Float
+  currency     String          @default("USD")
+  startDate    DateTime
+  endDate      DateTime
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  destinations Destination[]
+  travelModes  TravelMode[]
+  preferences  TripPreference?
+  itinerary    Itinerary?
+}
+
+model Destination {
+  id         String      @id @default(uuid())
+  tripId     String
+  trip       Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city       String
+  duration   Int
+  order      Int
+  dailyPlans DailyPlan[]
+}
+
+model TravelMode {
+  id     String @id @default(uuid())
+  tripId String
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  mode   String // 'plane', 'train', 'car', 'bus'
+}
+
+model TripPreference {
+  id                  String  @id @default(uuid())
+  tripId              String  @unique
+  trip                Trip    @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  adults              Int     @default(1)
+  children            Int     @default(0)
+  accommodationType   String // 'hotel', 'airbnb'
+  mealPlanning        Boolean @default(false)
+  activityPreferences String // Stored as JSON string: '["sightseeing", "adventure", "relaxation", etc.]'
+}
+
+model Itinerary {
+  id                 String      @id @default(uuid())
+  tripId             String      @unique
+  trip               Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  totalCost          Float
+  dailyPlans         DailyPlan[]
+  accommodationCost  Float
+  transportationCost Float
+  activitiesCost     Float
+  mealsCost          Float
+  otherCost          Float
+}
+
+model DailyPlan {
+  id             String          @id @default(uuid())
+  itineraryId    String
+  itinerary      Itinerary       @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  destinationId  String
+  destination    Destination     @relation(fields: [destinationId], references: [id])
+  date           DateTime
+  activities     Activity[]
+  meals          Meal[]
+  accommodation  Accommodation?
+  transportation Transportation?
+}
+
+model Activity {
+  id          String    @id @default(uuid())
+  dailyPlanId String
+  dailyPlan   DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  name        String
+  duration    Int
+  cost        Float
+}
+
+model Meal {
+  id          String    @id @default(uuid())
+  dailyPlanId String
+  dailyPlan   DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  type        String // 'breakfast', 'lunch', 'dinner'
+  name        String
+  cost        Float
+}
+
+model Accommodation {
+  id          String    @id @default(uuid())
+  dailyPlanId String    @unique
+  dailyPlan   DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  name        String
+  type        String // 'hotel', 'airbnb'
+  cost        Float
+}
+
+model Transportation {
+  id          String    @id @default(uuid())
+  dailyPlanId String    @unique
+  dailyPlan   DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  mode        String // 'plane', 'train', 'car', 'bus'
+  from        String
+  to          String
+  cost        Float
+  duration    Int
+}
