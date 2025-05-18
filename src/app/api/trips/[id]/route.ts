@@ -4,18 +4,12 @@ import type { TripPlan } from '@/types/trip'
 // TODO: Replace with actual database integration
 const mockTripPlans = new Map<string, TripPlan>()
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
 export async function GET(
   request: NextRequest,
-  props: Props
+  context: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const tripPlan = mockTripPlans.get(props.params.id)
+    const tripPlan = mockTripPlans.get(context.params.id)
     
     if (!tripPlan) {
       return NextResponse.json(
