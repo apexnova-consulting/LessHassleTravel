@@ -57,7 +57,7 @@ const steps = [
   { 
     number: '03',
     title: 'Customize Your Itinerary',
-    description: 'Tweak and adjust your plan until it's perfect for your needs.',
+    description: 'Tweak and adjust your plan until it\'s perfect for your needs.',
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2940&auto=format&fit=crop'
   },
   { 
