@@ -34,7 +34,7 @@ function calculateBudgetBreakdown(itinerary: TripPlan['itinerary']) {
   return breakdown
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const data: TripPreferences = await request.json()
 
