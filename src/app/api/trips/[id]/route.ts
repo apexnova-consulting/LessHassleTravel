@@ -6,10 +6,10 @@ const mockTripPlans = new Map<string, TripPlan>()
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const tripPlan = mockTripPlans.get(params.id)
+    const tripPlan = mockTripPlans.get(context.params.id)
     
     if (!tripPlan) {
       return NextResponse.json(
