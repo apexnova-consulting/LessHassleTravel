@@ -4,12 +4,16 @@ import type { TripPlan } from '@/types/trip'
 // TODO: Replace with actual database integration
 const mockTripPlans = new Map<string, TripPlan>()
 
+interface RouteSegment {
+  params: { id: string }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  segment: RouteSegment
 ): Promise<NextResponse> {
   try {
-    const tripPlan = mockTripPlans.get(params.id)
+    const tripPlan = mockTripPlans.get(segment.params.id)
     
     if (!tripPlan) {
       return NextResponse.json(
