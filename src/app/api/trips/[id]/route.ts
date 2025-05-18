@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import type { TripPlan } from '@/types/trip'
 
 // TODO: Replace with actual database integration
 const mockTripPlans = new Map<string, TripPlan>()
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

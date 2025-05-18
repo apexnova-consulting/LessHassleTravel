@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import type { TripPreferences, TripPlan } from '@/types/trip'
 
 // TODO: Replace with actual database integration
@@ -34,7 +34,7 @@ function calculateBudgetBreakdown(itinerary: TripPlan['itinerary']) {
   return breakdown
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const data: TripPreferences = await request.json()
 
