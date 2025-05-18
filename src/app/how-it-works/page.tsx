@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 const features = [
   {
     name: 'Smart Budget Allocation',
@@ -84,9 +86,9 @@ export default function HowItWorksPage() {
               >
                 Start Planning
               </a>
-              <a href="/" className="text-sm font-semibold leading-6 text-white">
+              <Link href="/" className="text-indigo-600 hover:text-indigo-500">
                 Learn more <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
             <svg
               viewBox="0 0 1024 1024"

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { tripPreferencesSchema } from '@/lib/validators/trip'
-import type { TripPreferences, Destination, TripPlan } from '@/types/trip'
+import type { TripPreferences, TripPlan } from '@/types/trip'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import { useRouter } from 'next/navigation'
