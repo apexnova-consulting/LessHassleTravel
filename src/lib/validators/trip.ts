@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const travelModeSchema = z.enum(['plane', 'train', 'car', 'bus'])
-export const accommodationTypeSchema = z.enum(['hotel', 'airbnb', 'resort', 'hostel'])
+export const accommodationTypeSchema = z.enum(['hotel', 'airbnb', 'resort', 'hostel', 'camping'])
 export const activityPreferenceSchema = z.enum([
   'sightseeing',
   'adventure',
@@ -9,7 +9,8 @@ export const activityPreferenceSchema = z.enum([
   'nightlife',
   'family',
   'culture',
-  'food'
+  'food',
+  'nature'
 ])
 
 export const destinationSchema = z.object({
@@ -23,6 +24,7 @@ export const tripPreferencesSchema = z.object({
   currency: z.string().default('USD').optional(),
   startDate: z.date(),
   endDate: z.date(),
+  originCity: z.string().optional(),
   travelers: z.object({
     adults: z.number().min(1, 'At least one adult traveler is required'),
     children: z.number().min(0)

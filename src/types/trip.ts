@@ -1,6 +1,6 @@
 export type TravelMode = 'plane' | 'train' | 'car' | 'bus'
 
-export type AccommodationType = 'hotel' | 'airbnb' | 'resort' | 'hostel'
+export type AccommodationType = 'hotel' | 'airbnb' | 'resort' | 'hostel' | 'camping'
 
 export type ActivityPreference = 
   | 'sightseeing'
@@ -10,6 +10,7 @@ export type ActivityPreference =
   | 'family'
   | 'culture'
   | 'food'
+  | 'nature'
 
 export interface Destination {
   city: string
@@ -22,6 +23,7 @@ export interface TripPreferences {
   currency?: string
   startDate: Date
   endDate: Date
+  originCity?: string
   travelers: {
     adults: number
     children: number

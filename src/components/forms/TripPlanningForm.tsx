@@ -165,6 +165,26 @@ export default function TripPlanningForm() {
               )}
             </div>
 
+            <div>
+              <label htmlFor="originCity" className="block text-sm font-medium text-gray-700">
+                Origin City (Where your trip starts from)
+              </label>
+              <div className="mt-1">
+                <Controller
+                  control={control}
+                  name="originCity"
+                  render={({ field }) => (
+                    <CitySearch
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      placeholder="Where are you traveling from?"
+                      error={errors.originCity?.message}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
