@@ -203,39 +203,8 @@ export async function POST(req: Request) {
 // Simple mock GET API that returns a list of trips
 export async function GET(req: NextRequest) {
   try {
-    // Generate a few mock trips
-    const mockTrips = [
-      {
-        id: uuidv4(),
-        title: 'Trip to Paris',
-        totalBudget: 3000,
-        currency: 'USD',
-        startDate: new Date('2023-12-10'),
-        endDate: new Date('2023-12-17'),
-        destinations: 'Paris, France',
-        totalCost: 2750
-      },
-      {
-        id: uuidv4(),
-        title: 'European Adventure',
-        totalBudget: 5000,
-        currency: 'USD',
-        startDate: new Date('2024-01-15'),
-        endDate: new Date('2024-01-30'),
-        destinations: 'London, UK; Paris, France; Rome, Italy',
-        totalCost: 4800
-      },
-      {
-        id: uuidv4(),
-        title: 'Asian Explorer',
-        totalBudget: 4500,
-        currency: 'USD',
-        startDate: new Date('2024-03-01'),
-        endDate: new Date('2024-03-15'),
-        destinations: 'Tokyo, Japan; Bangkok, Thailand',
-        totalCost: 4200
-      }
-    ]
+    // Return empty trips array by default for new users
+    const mockTrips: any[] = []
     
     return NextResponse.json(mockTrips)
   } catch (error) {
