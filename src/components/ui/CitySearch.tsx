@@ -45,13 +45,13 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
 
   // Update suggestions when input changes
   useEffect(() => {
-    if (debouncedValue.trim() === '') {
-      setSuggestions([])
-      setIsOpen(false)
-      return
-    }
-
     const fetchCities = async () => {
+      if (debouncedValue.trim() === '') {
+        setSuggestions([])
+        setIsOpen(false)
+        return
+      }
+
       setIsLoading(true)
       try {
         const results = await searchCities(debouncedValue);
@@ -59,21 +59,6 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
         setIsOpen(results.length > 0);
       } catch (error) {
         console.error('Error searching cities:', error);
-        // Fallback to static data if API fails
-        const searchTerm = debouncedValue.toLowerCase();
-        const fallbackResults = FALLBACK_CITIES.filter(city => {
-          const cityName = city.name.toLowerCase();
-          const countryName = city.country.toLowerCase();
-          const regionName = city.region?.toLowerCase() || '';
-          
-          return cityName.includes(searchTerm) || 
-                countryName.includes(searchTerm) || 
-                regionName.includes(searchTerm) ||
-                `${cityName}, ${countryName}`.includes(searchTerm);
-        });
-        
-        setSuggestions(fallbackResults);
-        setIsOpen(fallbackResults.length > 0);
       } finally {
         setIsLoading(false);
       }
@@ -81,6 +66,28 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
 
     fetchCities();
   }, [debouncedValue])
+
+  // Show dropdown on focus if there's input value
+  useEffect(() => {
+    if (inputValue.trim() !== '' && !isOpen) {
+      const fetchInitialResults = async () => {
+        setIsLoading(true);
+        try {
+          const results = await searchCities(inputValue);
+          if (results.length > 0) {
+            setSuggestions(results);
+            setIsOpen(true);
+          }
+        } catch (error) {
+          console.error('Error fetching initial city results:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchInitialResults();
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -96,9 +103,26 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
   }
 
   const handleFocus = () => {
-    // Show suggestions on focus if we have input
-    if (debouncedValue.trim() !== '' && suggestions.length > 0) {
-      setIsOpen(true)
+    // Always try to show suggestions on focus if we have input
+    if (inputValue.trim() !== '') {
+      const fetchOnFocus = async () => {
+        if (suggestions.length === 0) {
+          setIsLoading(true);
+          try {
+            const results = await searchCities(inputValue);
+            setSuggestions(results);
+            setIsOpen(results.length > 0);
+          } catch (error) {
+            console.error('Error fetching cities on focus:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        } else {
+          setIsOpen(true);
+        }
+      };
+      
+      fetchOnFocus();
     }
   }
 
