@@ -4,6 +4,7 @@
 import { notFound } from 'next/navigation'
 import type { TripPlan } from '@/types/trip'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 async function getTripPlan(id: string): Promise<TripPlan> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trips/${id}`, {
@@ -127,6 +128,12 @@ export default function TripDetailsPage({
   const [tripPlan, setTripPlan] = useState<TripPlan | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [aiRecommendations, setAiRecommendations] = useState<{
+    hotels: Array<{ name: string, url: string, price: number, rating: number }>,
+    flights: Array<{ airline: string, url: string, price: number, departureTime: string, arrivalTime: string }>,
+    activities: Array<{ name: string, url: string, price: number, description: string }>
+  } | null>(null)
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false)
 
   // Fetch trip plan data
   useEffect(() => {
@@ -135,6 +142,35 @@ export default function TripDetailsPage({
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false))
   }, [params.id])
+
+  // Get AI recommendations when trip plan is loaded
+  useEffect(() => {
+    if (tripPlan) {
+      setLoadingRecommendations(true)
+      // Simulate API call for AI recommendations
+      setTimeout(() => {
+        // Mock AI recommendations data
+        setAiRecommendations({
+          hotels: [
+            { name: "Grand Hotel", url: "https://example.com/hotel1", price: 150, rating: 4.5 },
+            { name: "Luxury Resort", url: "https://example.com/hotel2", price: 220, rating: 4.8 },
+            { name: "Cozy Inn", url: "https://example.com/hotel3", price: 95, rating: 4.2 }
+          ],
+          flights: [
+            { airline: "JetAir", url: "https://example.com/flight1", price: 350, departureTime: "09:00 AM", arrivalTime: "11:30 AM" },
+            { airline: "SkyWings", url: "https://example.com/flight2", price: 420, departureTime: "01:15 PM", arrivalTime: "03:45 PM" },
+            { airline: "Global Airways", url: "https://example.com/flight3", price: 310, departureTime: "07:30 PM", arrivalTime: "10:00 PM" }
+          ],
+          activities: [
+            { name: "City Tour", url: "https://example.com/activity1", price: 45, description: "Explore the city's landmarks with a local guide" },
+            { name: "Food Tasting", url: "https://example.com/activity2", price: 65, description: "Taste local delicacies at the best spots" },
+            { name: "Museum Pass", url: "https://example.com/activity3", price: 25, description: "Access to the city's top museums" }
+          ]
+        })
+        setLoadingRecommendations(false)
+      }, 1500)
+    }
+  }, [tripPlan])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -292,6 +328,122 @@ export default function TripDetailsPage({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* AI Recommendations Section */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-gray-900">AI-Powered Booking Recommendations</h2>
+            
+            {loadingRecommendations ? (
+              <div className="my-8 flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+              </div>
+            ) : aiRecommendations ? (
+              <div className="mt-6 space-y-6">
+                {/* Hotel Recommendations */}
+                <div className="rounded-lg bg-white shadow overflow-hidden">
+                  <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Hotel Options</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Based on your preferences and budget</p>
+                  </div>
+                  <div className="border-t border-gray-200">
+                    <ul role="list" className="divide-y divide-gray-200">
+                      {aiRecommendations.hotels.map((hotel, index) => (
+                        <li key={index} className="px-4 py-4 sm:px-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 truncate">{hotel.name}</p>
+                              <p className="text-sm text-gray-500">Rating: {hotel.rating}/5</p>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-sm font-medium text-gray-900 mr-4">${hotel.price}/night</span>
+                              <a
+                                href={hotel.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                              >
+                                Book Now
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Flight Recommendations */}
+                <div className="rounded-lg bg-white shadow overflow-hidden">
+                  <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Flight Options</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Recommended flights to your destinations</p>
+                  </div>
+                  <div className="border-t border-gray-200">
+                    <ul role="list" className="divide-y divide-gray-200">
+                      {aiRecommendations.flights.map((flight, index) => (
+                        <li key={index} className="px-4 py-4 sm:px-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 truncate">{flight.airline}</p>
+                              <p className="text-sm text-gray-500">Departure: {flight.departureTime} • Arrival: {flight.arrivalTime}</p>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-sm font-medium text-gray-900 mr-4">${flight.price}</span>
+                              <a
+                                href={flight.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                              >
+                                Book Now
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Activity Recommendations */}
+                <div className="rounded-lg bg-white shadow overflow-hidden">
+                  <div className="px-4 py-5 sm:px-6 bg-gray-50">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Activity Options</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Recommended activities for your trip</p>
+                  </div>
+                  <div className="border-t border-gray-200">
+                    <ul role="list" className="divide-y divide-gray-200">
+                      {aiRecommendations.activities.map((activity, index) => (
+                        <li key={index} className="px-4 py-4 sm:px-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 truncate">{activity.name}</p>
+                              <p className="text-sm text-gray-500">{activity.description}</p>
+                            </div>
+                            <div className="flex items-center">
+                              <span className="text-sm font-medium text-gray-900 mr-4">${activity.price}</span>
+                              <a
+                                href={activity.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                              >
+                                Book Now
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="my-8 text-center text-gray-500">
+                <p>Unable to load recommendations. Please try again later.</p>
+              </div>
+            )}
           </div>
 
           {/* Download Button */}

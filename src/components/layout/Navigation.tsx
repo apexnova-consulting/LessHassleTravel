@@ -38,6 +38,7 @@ function classNames(...classes: string[]) {
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [featuresMenuOpen, setFeaturesMenuOpen] = useState(false)
   const pathname = usePathname()
 
   return (
@@ -70,33 +71,42 @@ export default function Navigation() {
             <button
               type="button"
               className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900"
-              aria-expanded="false"
+              aria-expanded={featuresMenuOpen}
+              onClick={() => setFeaturesMenuOpen(!featuresMenuOpen)}
+              onMouseEnter={() => setFeaturesMenuOpen(true)}
+              onMouseLeave={() => setFeaturesMenuOpen(false)}
             >
               Features
               <ChevronDownIcon className="h-5 w-5 flex-none text-gray-400" aria-hidden="true" />
             </button>
 
-            <div className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 hidden group-hover:block">
-              <div className="p-4">
-                {features.map((item) => (
-                  <div
-                    key={item.name}
-                    className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                  >
-                    <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                      <item.icon className="h-6 w-6 text-primary-600 group-hover:text-primary-700" aria-hidden="true" />
+            {featuresMenuOpen && (
+              <div 
+                className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5"
+                onMouseEnter={() => setFeaturesMenuOpen(true)}
+                onMouseLeave={() => setFeaturesMenuOpen(false)}
+              >
+                <div className="p-4">
+                  {features.map((item) => (
+                    <div
+                      key={item.name}
+                      className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                    >
+                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                        <item.icon className="h-6 w-6 text-primary-600 group-hover:text-primary-700" aria-hidden="true" />
+                      </div>
+                      <div className="flex-auto">
+                        <Link href={item.href} className="block font-semibold text-gray-900">
+                          {item.name}
+                          <span className="absolute inset-0" />
+                        </Link>
+                        <p className="mt-1 text-gray-600">{item.description}</p>
+                      </div>
                     </div>
-                    <div className="flex-auto">
-                      <Link href={item.href} className="block font-semibold text-gray-900">
-                        {item.name}
-                        <span className="absolute inset-0" />
-                      </Link>
-                      <p className="mt-1 text-gray-600">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {navigation.map((item) => (
@@ -142,26 +152,31 @@ export default function Navigation() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
-                <div className="-mx-3">
-                  <button
-                    className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                  >
-                    Features
-                    <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
-                  </button>
-                  <div className="mt-2 space-y-2">
-                    {features.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                <Headless.Disclosure as="div" className="-mx-3">
+                  {({ open }) => (
+                    <>
+                      <Headless.Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
+                        Features
+                        <ChevronDownIcon
+                          className={classNames(open ? 'rotate-180' : '', 'h-5 w-5 flex-none')}
+                          aria-hidden="true"
+                        />
+                      </Headless.Disclosure.Button>
+                      <Headless.Disclosure.Panel className="mt-2 space-y-2">
+                        {features.map((item) => (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {item.name}
+                          </Link>
+                        ))}
+                      </Headless.Disclosure.Panel>
+                    </>
+                  )}
+                </Headless.Disclosure>
                 {navigation.map((item) => (
                   <Link
                     key={item.name}

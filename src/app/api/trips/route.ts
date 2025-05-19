@@ -3,39 +3,6 @@ import type { TripPreferences } from '@/types/trip'
 import { tripPreferencesSchema } from '@/lib/validators/trip'
 import prisma from '@/lib/db/prisma'
 
-// TODO: Replace with actual database integration
-const mockTripPlans = new Map<string, TripPlan>()
-
-function calculateTotalCost(itinerary: TripPlan['itinerary']): number {
-  return itinerary.dailyPlans.reduce((total, day) => {
-    const dayCost = 
-      day.activities.reduce((sum, activity) => sum + activity.cost, 0) +
-      day.meals.reduce((sum, meal) => sum + meal.cost, 0) +
-      day.accommodation.cost +
-      (day.transportation?.cost || 0)
-    return total + dayCost
-  }, 0)
-}
-
-function calculateBudgetBreakdown(itinerary: TripPlan['itinerary']) {
-  const breakdown = {
-    accommodation: 0,
-    transportation: 0,
-    activities: 0,
-    meals: 0,
-    other: 0,
-  }
-
-  itinerary.dailyPlans.forEach(day => {
-    breakdown.accommodation += day.accommodation.cost
-    breakdown.transportation += day.transportation?.cost || 0
-    breakdown.activities += day.activities.reduce((sum, activity) => sum + activity.cost, 0)
-    breakdown.meals += day.meals.reduce((sum, meal) => sum + meal.cost, 0)
-  })
-
-  return breakdown
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json()

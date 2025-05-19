@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { tripPreferencesSchema } from '@/lib/validators/trip'
 import type { TripPreferences, TripPlan } from '@/types/trip'
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import { useRouter } from 'next/navigation'
+import CitySearch from '@/components/ui/CitySearch'
 
 const steps = [
   { id: 'budget', name: 'Budget & Dates' },
@@ -169,13 +170,19 @@ export default function TripPlanningForm() {
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                   Start Date
                 </label>
-                <DatePicker
-                  selected={watch('startDate')}
-                  onChange={(date) => register('startDate').onChange({ target: { value: date } })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                  dateFormat="MM/dd/yyyy"
-                  placeholderText="Select start date"
-                  minDate={new Date()}
+                <Controller
+                  control={control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <DatePicker
+                      selected={field.value}
+                      onChange={(date) => field.onChange(date)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                      dateFormat="MM/dd/yyyy"
+                      placeholderText="Select start date"
+                      minDate={new Date()}
+                    />
+                  )}
                 />
                 {errors.startDate && (
                   <p className="mt-2 text-sm text-red-600">{errors.startDate.message}</p>
@@ -186,13 +193,19 @@ export default function TripPlanningForm() {
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                   End Date
                 </label>
-                <DatePicker
-                  selected={watch('endDate')}
-                  onChange={(date) => register('endDate').onChange({ target: { value: date } })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                  dateFormat="MM/dd/yyyy"
-                  placeholderText="Select end date"
-                  minDate={watch('startDate') || new Date()}
+                <Controller
+                  control={control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <DatePicker
+                      selected={field.value}
+                      onChange={(date) => field.onChange(date)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                      dateFormat="MM/dd/yyyy"
+                      placeholderText="Select end date"
+                      minDate={watch('startDate') || new Date()}
+                    />
+                  )}
                 />
                 {errors.endDate && (
                   <p className="mt-2 text-sm text-red-600">{errors.endDate.message}</p>
@@ -247,14 +260,18 @@ export default function TripPlanningForm() {
                     <label className="block text-sm font-medium text-gray-700">
                       Destination {index + 1}
                     </label>
-                    <input
-                      {...register(`destinations.${index}.city`)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                      placeholder="City name"
+                    <Controller
+                      control={control}
+                      name={`destinations.${index}.city`}
+                      render={({ field }) => (
+                        <CitySearch
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Search for a city"
+                          error={errors?.destinations?.[index]?.city?.message}
+                        />
+                      )}
                     />
-                    {errors?.destinations?.[index]?.city && (
-                      <p className="mt-2 text-sm text-red-600">{errors.destinations[index].city.message}</p>
-                    )}
                   </div>
                   <div className="w-32">
                     <label className="block text-sm font-medium text-gray-700">

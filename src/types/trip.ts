@@ -19,7 +19,7 @@ export interface Destination {
 
 export interface TripPreferences {
   totalBudget: number
-  currency: string
+  currency?: string
   startDate: Date
   endDate: Date
   travelers: {
