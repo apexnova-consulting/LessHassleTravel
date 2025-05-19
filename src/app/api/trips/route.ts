@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { TripPreferences } from '@/types/trip'
 import { tripPreferencesSchema } from '@/lib/validators/trip'
-import prisma from '@/lib/db/prisma'
+import { v4 as uuidv4 } from 'uuid'
 
+// Mock API implementation that doesn't rely on Prisma/database
 export async function POST(req: Request) {
   try {
     const body = await req.json()
@@ -10,218 +11,186 @@ export async function POST(req: Request) {
     // Validate the request body
     const validatedData = tripPreferencesSchema.parse(body)
     
-    // For now, we'll use a mock user ID
-    // In a real app, this would come from authentication
-    const mockUserId = "user-123456"
+    // Generate a unique ID for this trip
+    const tripId = uuidv4()
     
-    // Create a new trip in the database
-    const trip = await prisma.trip.create({
-      data: {
-        userId: mockUserId,
-        title: `Trip to ${validatedData.destinations[0]?.city || 'Unknown'}`,
+    // Calculate trip duration
+    const startDate = new Date(validatedData.startDate)
+    const endDate = new Date(validatedData.endDate)
+    const tripDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    // Use the first destination as the main destination
+    const mainDestination = validatedData.destinations[0]?.city || 'Unknown'
+    
+    // Generate mock daily plans
+    const dailyPlans = []
+    
+    // Determine accommodation cost based on preferences and budget
+    const dailyAccommodationCost = 
+      validatedData.accommodationType === 'hotel' ? 150 :
+      validatedData.accommodationType === 'resort' ? 250 :
+      validatedData.accommodationType === 'airbnb' ? 120 :
+      validatedData.accommodationType === 'hostel' ? 40 : 80
+    
+    // Activity costs based on preferences
+    const activityCosts: Record<string, number> = {
+      'sightseeing': 50,
+      'adventure': 80,
+      'relaxation': 60,
+      'nightlife': 70,
+      'family': 45,
+      'culture': 40,
+      'food': 55,
+      'nature': 35
+    }
+    
+    // Calculate daily budget
+    const dailyBudget = validatedData.totalBudget / tripDuration
+    
+    // Create daily plans
+    for (let i = 0; i < tripDuration; i++) {
+      const currentDate = new Date(startDate)
+      currentDate.setDate(startDate.getDate() + i)
+      
+      // Alternate between destinations if multiple are provided
+      const destinationIndex = i % validatedData.destinations.length
+      const currentDestination = validatedData.destinations[destinationIndex]?.city || mainDestination
+      
+      // Select activities based on preferences (2-3 activities per day)
+      const dailyActivities = []
+      const prefActivities = validatedData.activityPreferences.length > 0 
+        ? validatedData.activityPreferences 
+        : ['sightseeing', 'culture', 'food']
+      
+      // Select 2-3 activities based on preferences
+      const activityCount = 2 + Math.floor(Math.random() * 2) // 2 or 3 activities
+      const shuffledActivities = [...prefActivities].sort(() => Math.random() - 0.5)
+      
+      for (let j = 0; j < Math.min(activityCount, shuffledActivities.length); j++) {
+        const activityType = shuffledActivities[j]
+        const cost = activityCosts[activityType] || 50
+        
+        const activityNames: Record<string, string[]> = {
+          'sightseeing': ['City Tour', 'Landmark Visit', 'Guided Walk'],
+          'adventure': ['Hiking Trip', 'Water Rafting', 'Zip Lining'],
+          'relaxation': ['Spa Day', 'Beach Time', 'Park Visit'],
+          'nightlife': ['Evening Show', 'Live Music', 'Local Bar Tour'],
+          'family': ['Theme Park', 'Kid-friendly Museum', 'Playground Visit'],
+          'culture': ['Museum Visit', 'Art Gallery', 'Historical Site'],
+          'food': ['Food Tasting', 'Cooking Class', 'Restaurant Tour'],
+          'nature': ['Nature Reserve', 'Botanical Garden', 'Wildlife Watching']
+        }
+        
+        const activityOptions = activityNames[activityType] || ['Local Activity']
+        const activityName = activityOptions[Math.floor(Math.random() * activityOptions.length)]
+        
+        dailyActivities.push({
+          name: activityName,
+          duration: 2 + Math.floor(Math.random() * 3), // 2-4 hours
+          cost
+        })
+      }
+      
+      // Create meals
+      const meals = [
+        {
+          type: 'breakfast',
+          name: i % 2 === 0 ? 'Hotel Breakfast' : 'Local Café',
+          cost: 15
+        },
+        {
+          type: 'lunch',
+          name: i % 3 === 0 ? 'Street Food' : i % 3 === 1 ? 'Casual Restaurant' : 'Quick Bite',
+          cost: 25
+        },
+        {
+          type: 'dinner',
+          name: i % 4 === 0 ? 'Fine Dining' : i % 4 === 1 ? 'Local Specialty Restaurant' : i % 4 === 2 ? 'Seafood Place' : 'International Cuisine',
+          cost: 40
+        }
+      ]
+      
+      // Add transportation if changing cities
+      let transportation = null
+      if (i > 0 && destinationIndex !== (i - 1) % validatedData.destinations.length) {
+        const prevDestination = validatedData.destinations[(i - 1) % validatedData.destinations.length]?.city || mainDestination
+        const mode = validatedData.travelModes.length > 0 
+          ? validatedData.travelModes[Math.floor(Math.random() * validatedData.travelModes.length)]
+          : 'plane'
+        
+        transportation = {
+          mode,
+          from: prevDestination,
+          to: currentDestination,
+          duration: mode === 'plane' ? 2 : mode === 'train' ? 4 : mode === 'bus' ? 6 : 5,
+          cost: mode === 'plane' ? 200 : mode === 'train' ? 100 : mode === 'bus' ? 50 : 80
+        }
+      }
+      
+      // Create the daily plan
+      dailyPlans.push({
+        date: currentDate,
+        destination: currentDestination,
+        activities: dailyActivities,
+        meals,
+        accommodation: {
+          name: `${currentDestination} ${
+            validatedData.accommodationType === 'hotel' ? 'Hotel' : 
+            validatedData.accommodationType === 'resort' ? 'Resort' : 
+            validatedData.accommodationType === 'airbnb' ? 'Apartment' : 
+            validatedData.accommodationType === 'hostel' ? 'Hostel' : 'Lodging'
+          }`,
+          type: validatedData.accommodationType,
+          cost: dailyAccommodationCost
+        },
+        transportation
+      })
+    }
+    
+    // Calculate total costs
+    const accommodationCost = dailyPlans.reduce((sum, plan) => sum + plan.accommodation.cost, 0)
+    const transportationCost = dailyPlans.reduce((sum, plan) => sum + (plan.transportation?.cost || 0), 0)
+    const activitiesCost = dailyPlans.reduce((sum, plan) => 
+      sum + plan.activities.reduce((actSum, act) => actSum + act.cost, 0), 0)
+    const mealsCost = dailyPlans.reduce((sum, plan) => 
+      sum + plan.meals.reduce((mealSum, meal) => mealSum + meal.cost, 0), 0)
+    const otherCost = Math.round(validatedData.totalBudget * 0.05) // 5% for miscellaneous expenses
+    
+    const totalCost = accommodationCost + transportationCost + activitiesCost + mealsCost + otherCost
+    
+    // Create the response trip plan
+    const tripPlan = {
+      id: tripId,
+      preferences: {
         totalBudget: validatedData.totalBudget,
         currency: validatedData.currency || 'USD',
         startDate: validatedData.startDate,
         endDate: validatedData.endDate,
-        
-        // Create related destinations
-        destinations: {
-          create: validatedData.destinations.map(dest => ({
-            city: dest.city,
-            duration: dest.duration,
-            order: dest.order
-          }))
-        },
-        
-        // Create related travel modes
-        travelModes: {
-          create: validatedData.travelModes.map(mode => ({
-            mode: mode
-          }))
-        },
-        
-        // Create trip preferences
-        preferences: {
-          create: {
-            adults: validatedData.travelers.adults,
-            children: validatedData.travelers.children,
-            accommodationType: validatedData.accommodationType,
-            mealPlanning: validatedData.mealPlanning,
-            activityPreferences: JSON.stringify(validatedData.activityPreferences)
-          }
-        }
-      }
-    })
-    
-    // Generate a mock itinerary (in a real app, this would be based on AI or other logic)
-    const itinerary = await prisma.itinerary.create({
-      data: {
-        tripId: trip.id,
-        totalCost: validatedData.totalBudget * 0.9, // Mock calculation
-        accommodationCost: validatedData.totalBudget * 0.4,
-        transportationCost: validatedData.totalBudget * 0.2,
-        activitiesCost: validatedData.totalBudget * 0.2,
-        mealsCost: validatedData.totalBudget * 0.1,
-        otherCost: validatedData.totalBudget * 0.1,
-        
-        // Create daily plans for each day of the trip
-        dailyPlans: {
-          create: Array.from({ length: 3 }).map((_, index) => {
-            const date = new Date(validatedData.startDate)
-            date.setDate(date.getDate() + index)
-            
-            return {
-              date,
-              destinationId: '', // This will be updated after creation
-              
-              // Create activities for the day
-              activities: {
-                create: [
-                  {
-                    name: 'Sightseeing Tour',
-                    duration: 3,
-                    cost: 50
-                  },
-                  {
-                    name: 'Museum Visit',
-                    duration: 2,
-                    cost: 25
-                  }
-                ]
-              },
-              
-              // Create meals for the day
-              meals: {
-                create: [
-                  {
-                    type: 'breakfast',
-                    name: 'Hotel Breakfast',
-                    cost: 15
-                  },
-                  {
-                    type: 'lunch',
-                    name: 'Local Restaurant',
-                    cost: 25
-                  },
-                  {
-                    type: 'dinner',
-                    name: 'Fine Dining Experience',
-                    cost: 50
-                  }
-                ]
-              },
-              
-              // Create accommodation for the day
-              accommodation: {
-                create: {
-                  name: 'Central Hotel',
-                  type: validatedData.accommodationType,
-                  cost: 150
-                }
-              }
-            }
-          })
-        }
-      }
-    })
-    
-    // Get the first destination to assign to daily plans
-    const firstDestination = await prisma.destination.findFirst({
-      where: { tripId: trip.id }
-    })
-    
-    if (firstDestination) {
-      // Update daily plans with the destination ID
-      await prisma.dailyPlan.updateMany({
-        where: { itineraryId: itinerary.id },
-        data: { destinationId: firstDestination.id }
-      })
-    }
-    
-    // Fetch the created trip with all its relations
-    const fullTrip = await prisma.trip.findUnique({
-      where: { id: trip.id },
-      include: {
-        destinations: true,
-        travelModes: true,
-        preferences: true,
-        itinerary: {
-          include: {
-            dailyPlans: {
-              include: {
-                destination: true,
-                activities: true,
-                meals: true,
-                accommodation: true,
-                transportation: true
-              }
-            }
-          }
-        }
-      }
-    })
-    
-    // Transform the database model to match our API response type
-    const transformedTrip = {
-      id: fullTrip?.id,
-      preferences: {
-        totalBudget: fullTrip?.totalBudget || 0,
-        currency: fullTrip?.currency || 'USD',
-        startDate: fullTrip?.startDate || new Date(),
-        endDate: fullTrip?.endDate || new Date(),
-        travelers: {
-          adults: fullTrip?.preferences?.adults || 1,
-          children: fullTrip?.preferences?.children || 0
-        },
-        destinations: fullTrip?.destinations.map(dest => ({
+        travelers: validatedData.travelers,
+        destinations: validatedData.destinations.map(dest => ({
           city: dest.city,
           duration: dest.duration,
           order: dest.order
-        })) || [],
-        travelModes: fullTrip?.travelModes.map(tm => tm.mode) as any[] || [],
-        accommodationType: fullTrip?.preferences?.accommodationType as any || 'hotel',
-        activityPreferences: JSON.parse(fullTrip?.preferences?.activityPreferences || '[]'),
-        mealPlanning: fullTrip?.preferences?.mealPlanning || false
+        })),
+        travelModes: validatedData.travelModes,
+        accommodationType: validatedData.accommodationType,
+        activityPreferences: validatedData.activityPreferences,
+        mealPlanning: validatedData.mealPlanning
       },
       itinerary: {
-        dailyPlans: fullTrip?.itinerary?.dailyPlans.map(dp => ({
-          date: dp.date,
-          destination: dp.destination?.city || 'Unknown',
-          activities: dp.activities.map(act => ({
-            name: act.name,
-            duration: act.duration,
-            cost: act.cost
-          })),
-          meals: dp.meals.map(meal => ({
-            type: meal.type as any,
-            name: meal.name,
-            cost: meal.cost
-          })),
-          accommodation: dp.accommodation ? {
-            name: dp.accommodation.name,
-            type: dp.accommodation.type as any,
-            cost: dp.accommodation.cost
-          } : undefined,
-          transportation: dp.transportation ? {
-            mode: dp.transportation.mode as any,
-            from: dp.transportation.from,
-            to: dp.transportation.to,
-            cost: dp.transportation.cost,
-            duration: dp.transportation.duration
-          } : undefined
-        })) || [],
-        totalCost: fullTrip?.itinerary?.totalCost || 0,
+        dailyPlans,
+        totalCost,
         budgetBreakdown: {
-          accommodation: fullTrip?.itinerary?.accommodationCost || 0,
-          transportation: fullTrip?.itinerary?.transportationCost || 0,
-          activities: fullTrip?.itinerary?.activitiesCost || 0,
-          meals: fullTrip?.itinerary?.mealsCost || 0,
-          other: fullTrip?.itinerary?.otherCost || 0
+          accommodation: accommodationCost,
+          transportation: transportationCost,
+          activities: activitiesCost,
+          meals: mealsCost,
+          other: otherCost
         }
       }
     }
     
-    return NextResponse.json(transformedTrip, { status: 201 })
+    return NextResponse.json(tripPlan, { status: 201 })
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
@@ -231,48 +200,44 @@ export async function POST(req: Request) {
   }
 }
 
+// Simple mock GET API that returns a list of trips
 export async function GET(req: NextRequest) {
   try {
-    // For now, we'll use a mock user ID
-    // In a real app, this would come from authentication
-    const mockUserId = "user-123456"
-    
-    // Get all trips for the user
-    const trips = await prisma.trip.findMany({
-      where: { userId: mockUserId },
-      include: {
-        destinations: true,
-        travelModes: true,
-        preferences: true,
-        itinerary: {
-          include: {
-            dailyPlans: {
-              include: {
-                destination: true,
-                activities: true,
-                meals: true,
-                accommodation: true,
-                transportation: true
-              }
-            }
-          }
-        }
+    // Generate a few mock trips
+    const mockTrips = [
+      {
+        id: uuidv4(),
+        title: 'Trip to Paris',
+        totalBudget: 3000,
+        currency: 'USD',
+        startDate: new Date('2023-12-10'),
+        endDate: new Date('2023-12-17'),
+        destinations: 'Paris, France',
+        totalCost: 2750
+      },
+      {
+        id: uuidv4(),
+        title: 'European Adventure',
+        totalBudget: 5000,
+        currency: 'USD',
+        startDate: new Date('2024-01-15'),
+        endDate: new Date('2024-01-30'),
+        destinations: 'London, UK; Paris, France; Rome, Italy',
+        totalCost: 4800
+      },
+      {
+        id: uuidv4(),
+        title: 'Asian Explorer',
+        totalBudget: 4500,
+        currency: 'USD',
+        startDate: new Date('2024-03-01'),
+        endDate: new Date('2024-03-15'),
+        destinations: 'Tokyo, Japan; Bangkok, Thailand',
+        totalCost: 4200
       }
-    })
+    ]
     
-    // Transform the trips to match our API response type
-    const transformedTrips = trips.map(trip => ({
-      id: trip.id,
-      title: trip.title,
-      totalBudget: trip.totalBudget,
-      currency: trip.currency,
-      startDate: trip.startDate,
-      endDate: trip.endDate,
-      destinations: trip.destinations.map(dest => dest.city).join(', '),
-      totalCost: trip.itinerary?.totalCost || 0
-    }))
-    
-    return NextResponse.json(transformedTrips)
+    return NextResponse.json(mockTrips)
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 })

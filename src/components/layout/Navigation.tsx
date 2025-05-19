@@ -8,28 +8,16 @@ import * as Headless from '@headlessui/react'
 import { 
   Bars3Icon, 
   XMarkIcon,
-  MapPinIcon,
-  CalendarIcon,
-  CurrencyDollarIcon,
-  ChartBarIcon,
-  RectangleGroupIcon
 } from '@heroicons/react/24/outline'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
 const navigation = [
   { name: 'Home', href: '/' },
+  { name: 'Features', href: '/plan' },
   { name: 'How It Works', href: '/how-it-works' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Blog', href: '/blog' },
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Contact', href: '/contact' },
-]
-
-const features = [
-  { name: 'Multi-City Planning', description: 'Plan trips across multiple destinations with ease.', href: '/plan', icon: MapPinIcon },
-  { name: 'Budget Allocation', description: 'Smart algorithms to distribute your budget effectively.', href: '/plan', icon: CurrencyDollarIcon },
-  { name: 'Activity Recommendations', description: 'Personalized suggestions based on your interests.', href: '/plan', icon: CalendarIcon },
-  { name: 'Trip Analytics', description: 'Visualize your trip stats and optimize your journey.', href: '/plan', icon: ChartBarIcon },
 ]
 
 function classNames(...classes: string[]) {
@@ -38,11 +26,10 @@ function classNames(...classes: string[]) {
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [featuresMenuOpen, setFeaturesMenuOpen] = useState(false)
   const pathname = usePathname()
 
   return (
-    <header className="bg-white">
+    <header className="bg-white relative z-50">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center">
@@ -67,48 +54,6 @@ export default function Navigation() {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
-          <div className="relative">
-            <button
-              type="button"
-              className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900"
-              aria-expanded={featuresMenuOpen}
-              onClick={() => setFeaturesMenuOpen(!featuresMenuOpen)}
-              onMouseEnter={() => setFeaturesMenuOpen(true)}
-              onMouseLeave={() => setFeaturesMenuOpen(false)}
-            >
-              Features
-              <ChevronDownIcon className="h-5 w-5 flex-none text-gray-400" aria-hidden="true" />
-            </button>
-
-            {featuresMenuOpen && (
-              <div 
-                className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5"
-                onMouseEnter={() => setFeaturesMenuOpen(true)}
-                onMouseLeave={() => setFeaturesMenuOpen(false)}
-              >
-                <div className="p-4">
-                  {features.map((item) => (
-                    <div
-                      key={item.name}
-                      className="group relative flex items-center gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
-                    >
-                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
-                        <item.icon className="h-6 w-6 text-primary-600 group-hover:text-primary-700" aria-hidden="true" />
-                      </div>
-                      <div className="flex-auto">
-                        <Link href={item.href} className="block font-semibold text-gray-900">
-                          {item.name}
-                          <span className="absolute inset-0" />
-                        </Link>
-                        <p className="mt-1 text-gray-600">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
           {navigation.map((item) => (
             <Link
               key={item.name}
@@ -152,31 +97,6 @@ export default function Navigation() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
-                <Headless.Disclosure as="div" className="-mx-3">
-                  {({ open }) => (
-                    <>
-                      <Headless.Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
-                        Features
-                        <ChevronDownIcon
-                          className={classNames(open ? 'rotate-180' : '', 'h-5 w-5 flex-none')}
-                          aria-hidden="true"
-                        />
-                      </Headless.Disclosure.Button>
-                      <Headless.Disclosure.Panel className="mt-2 space-y-2">
-                        {features.map((item) => (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            {item.name}
-                          </Link>
-                        ))}
-                      </Headless.Disclosure.Panel>
-                    </>
-                  )}
-                </Headless.Disclosure>
                 {navigation.map((item) => (
                   <Link
                     key={item.name}

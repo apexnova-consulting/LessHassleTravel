@@ -6,6 +6,9 @@ import { useDebounce } from '@/hooks/useDebounce'
 interface City {
   name: string
   country: string
+  countryCode?: string
+  region?: string
+  population?: number
 }
 
 interface CitySearchProps {
@@ -16,35 +19,65 @@ interface CitySearchProps {
   error?: string
 }
 
-// Mock city data - in a real app, this would come from an API
+// More comprehensive city data
 const CITIES: City[] = [
-  { name: 'New York', country: 'USA' },
-  { name: 'London', country: 'UK' },
-  { name: 'Paris', country: 'France' },
-  { name: 'Tokyo', country: 'Japan' },
-  { name: 'Sydney', country: 'Australia' },
-  { name: 'Rome', country: 'Italy' },
-  { name: 'Berlin', country: 'Germany' },
-  { name: 'Barcelona', country: 'Spain' },
-  { name: 'Amsterdam', country: 'Netherlands' },
-  { name: 'Singapore', country: 'Singapore' },
-  { name: 'Dubai', country: 'UAE' },
-  { name: 'San Francisco', country: 'USA' },
-  { name: 'Los Angeles', country: 'USA' },
-  { name: 'Chicago', country: 'USA' },
-  { name: 'Miami', country: 'USA' },
-  { name: 'Toronto', country: 'Canada' },
-  { name: 'Vancouver', country: 'Canada' },
-  { name: 'Hong Kong', country: 'China' },
-  { name: 'Bangkok', country: 'Thailand' },
-  { name: 'Seoul', country: 'South Korea' },
-]
+  { name: 'Paris', country: 'France', countryCode: 'FR', region: 'Île-de-France', population: 2161000 },
+  { name: 'London', country: 'United Kingdom', countryCode: 'GB', region: 'England', population: 8982000 },
+  { name: 'New York', country: 'United States', countryCode: 'US', region: 'New York', population: 8419000 },
+  { name: 'Tokyo', country: 'Japan', countryCode: 'JP', region: 'Kanto', population: 13960000 },
+  { name: 'Barcelona', country: 'Spain', countryCode: 'ES', region: 'Catalonia', population: 1620000 },
+  { name: 'Rome', country: 'Italy', countryCode: 'IT', region: 'Lazio', population: 2873000 },
+  { name: 'Berlin', country: 'Germany', countryCode: 'DE', region: 'Berlin', population: 3670000 },
+  { name: 'Amsterdam', country: 'Netherlands', countryCode: 'NL', region: 'North Holland', population: 821000 },
+  { name: 'Sydney', country: 'Australia', countryCode: 'AU', region: 'New South Wales', population: 5312000 },
+  { name: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', region: 'Dubai', population: 3331000 },
+  { name: 'Istanbul', country: 'Turkey', countryCode: 'TR', region: 'Marmara', population: 15460000 },
+  { name: 'Singapore', country: 'Singapore', countryCode: 'SG', region: 'Central Region', population: 5686000 },
+  { name: 'Bangkok', country: 'Thailand', countryCode: 'TH', region: 'Central Thailand', population: 8281000 },
+  { name: 'Hong Kong', country: 'China', countryCode: 'CN', region: 'Hong Kong', population: 7482000 },
+  { name: 'Los Angeles', country: 'United States', countryCode: 'US', region: 'California', population: 3990000 },
+  { name: 'Chicago', country: 'United States', countryCode: 'US', region: 'Illinois', population: 2706000 },
+  { name: 'Miami', country: 'United States', countryCode: 'US', region: 'Florida', population: 467000 },
+  { name: 'Toronto', country: 'Canada', countryCode: 'CA', region: 'Ontario', population: 2930000 },
+  { name: 'Vancouver', country: 'Canada', countryCode: 'CA', region: 'British Columbia', population: 675000 },
+  { name: 'San Francisco', country: 'United States', countryCode: 'US', region: 'California', population: 884000 },
+  { name: 'Seattle', country: 'United States', countryCode: 'US', region: 'Washington', population: 744000 },
+  { name: 'Boston', country: 'United States', countryCode: 'US', region: 'Massachusetts', population: 694000 },
+  { name: 'Rio de Janeiro', country: 'Brazil', countryCode: 'BR', region: 'Rio de Janeiro', population: 6748000 },
+  { name: 'Mexico City', country: 'Mexico', countryCode: 'MX', region: 'Mexico City', population: 9209000 },
+  { name: 'Madrid', country: 'Spain', countryCode: 'ES', region: 'Madrid', population: 3223000 },
+  { name: 'Lisbon', country: 'Portugal', countryCode: 'PT', region: 'Lisbon', population: 505000 },
+  { name: 'Vienna', country: 'Austria', countryCode: 'AT', region: 'Vienna', population: 1897000 },
+  { name: 'Prague', country: 'Czech Republic', countryCode: 'CZ', region: 'Prague', population: 1309000 },
+  { name: 'Budapest', country: 'Hungary', countryCode: 'HU', region: 'Central Hungary', population: 1752000 },
+  { name: 'Athens', country: 'Greece', countryCode: 'GR', region: 'Attica', population: 664000 },
+  { name: 'Copenhagen', country: 'Denmark', countryCode: 'DK', region: 'Capital Region', population: 602000 },
+  { name: 'Oslo', country: 'Norway', countryCode: 'NO', region: 'Oslo', population: 693000 },
+  { name: 'Stockholm', country: 'Sweden', countryCode: 'SE', region: 'Stockholm County', population: 965000 },
+  { name: 'Helsinki', country: 'Finland', countryCode: 'FI', region: 'Uusimaa', population: 656000 },
+  { name: 'Munich', country: 'Germany', countryCode: 'DE', region: 'Bavaria', population: 1471000 },
+  { name: 'Milan', country: 'Italy', countryCode: 'IT', region: 'Lombardy', population: 1352000 },
+  { name: 'Naples', country: 'Italy', countryCode: 'IT', region: 'Campania', population: 967000 },
+  { name: 'Florence', country: 'Italy', countryCode: 'IT', region: 'Tuscany', population: 382000 },
+  { name: 'Venice', country: 'Italy', countryCode: 'IT', region: 'Veneto', population: 261000 },
+  { name: 'Bari', country: 'Italy', countryCode: 'IT', region: 'Apulia', population: 324000 },
+  { name: 'Melbourne', country: 'Australia', countryCode: 'AU', region: 'Victoria', population: 5078000 },
+  { name: 'Brisbane', country: 'Australia', countryCode: 'AU', region: 'Queensland', population: 2560000 },
+  { name: 'Perth', country: 'Australia', countryCode: 'AU', region: 'Western Australia', population: 2059000 },
+  { name: 'Auckland', country: 'New Zealand', countryCode: 'NZ', region: 'Auckland', population: 1657000 },
+  { name: 'Dublin', country: 'Ireland', countryCode: 'IE', region: 'Leinster', population: 554000 },
+  { name: 'Edinburgh', country: 'United Kingdom', countryCode: 'GB', region: 'Scotland', population: 482000 },
+  { name: 'Glasgow', country: 'United Kingdom', countryCode: 'GB', region: 'Scotland', population: 612000 },
+  { name: 'Manchester', country: 'United Kingdom', countryCode: 'GB', region: 'England', population: 547000 },
+  { name: 'Liverpool', country: 'United Kingdom', countryCode: 'GB', region: 'England', population: 494000 },
+  { name: 'Brussels', country: 'Belgium', countryCode: 'BE', region: 'Brussels-Capital', population: 181000 },
+];
 
 export default function CitySearch({ value, onChange, placeholder = 'Search for a city', className = '', error }: CitySearchProps) {
   const [inputValue, setInputValue] = useState(value)
   const [isOpen, setIsOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<City[]>([])
-  const debouncedValue = useDebounce(inputValue, 300)
+  const debouncedValue = useDebounce(inputValue, 200)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Close dropdown when clicking outside
@@ -65,27 +98,49 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
   useEffect(() => {
     if (debouncedValue.trim() === '') {
       setSuggestions([])
+      setIsOpen(false)
       return
     }
 
     const searchTerm = debouncedValue.toLowerCase()
-    const filteredCities = CITIES.filter(city =>
-      city.name.toLowerCase().includes(searchTerm) || 
-      city.country.toLowerCase().includes(searchTerm)
-    )
-
+    
+    // More comprehensive search logic
+    const filteredCities = CITIES.filter(city => {
+      const cityName = city.name.toLowerCase()
+      const countryName = city.country.toLowerCase()
+      const regionName = city.region?.toLowerCase() || ''
+      
+      // Search for matches in city name, country name, or region
+      return cityName.includes(searchTerm) || 
+             countryName.includes(searchTerm) || 
+             regionName.includes(searchTerm) ||
+             // Combined searches like "city, country"
+             `${cityName}, ${countryName}`.includes(searchTerm) ||
+             `${cityName} ${countryName}`.includes(searchTerm)
+    }).slice(0, 10) // Limit to top 10 results
+    
     setSuggestions(filteredCities)
     setIsOpen(filteredCities.length > 0)
   }, [debouncedValue])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
+    // Don't update parent component until selection is made
   }
 
   const handleSelect = (city: City) => {
-    setInputValue(city.name)
-    onChange(city.name)
+    // Format selection as "City, Country"
+    const formattedValue = `${city.name}, ${city.country}`
+    setInputValue(formattedValue)
+    onChange(formattedValue) // Update the parent component
     setIsOpen(false)
+  }
+
+  const handleFocus = () => {
+    // Show suggestions on focus if we have input
+    if (debouncedValue.trim() !== '' && suggestions.length > 0) {
+      setIsOpen(true)
+    }
   }
 
   return (
@@ -94,9 +149,10 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
         type="text"
         value={inputValue}
         onChange={handleChange}
-        onFocus={() => debouncedValue.trim() !== '' && setSuggestions.length > 0 && setIsOpen(true)}
+        onFocus={handleFocus}
         placeholder={placeholder}
         className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm ${className}`}
+        autoComplete="off"
       />
       
       {error && (
@@ -104,16 +160,16 @@ export default function CitySearch({ value, onChange, placeholder = 'Search for 
       )}
 
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+        <div className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
           {suggestions.map((city, index) => (
             <div
               key={index}
               className="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-gray-100"
               onClick={() => handleSelect(city)}
             >
-              <div className="flex items-center">
-                <span className="font-medium">{city.name}</span>
-                <span className="ml-2 text-gray-500">{city.country}</span>
+              <div className="flex flex-col">
+                <span className="font-medium">{city.name}, {city.country}</span>
+                <span className="text-xs text-gray-500">{city.region} • {city.population?.toLocaleString()} people</span>
               </div>
             </div>
           ))}
