@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const travelModeSchema = z.enum(['plane', 'train', 'car', 'bus'])
-export const accommodationTypeSchema = z.enum(['hotel', 'airbnb'])
+export const accommodationTypeSchema = z.enum(['hotel', 'airbnb', 'resort', 'hostel'])
 export const activityPreferenceSchema = z.enum([
   'sightseeing',
   'adventure',

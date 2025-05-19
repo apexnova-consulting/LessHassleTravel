@@ -1,6 +1,6 @@
 export type TravelMode = 'plane' | 'train' | 'car' | 'bus'
 
-export type AccommodationType = 'hotel' | 'airbnb'
+export type AccommodationType = 'hotel' | 'airbnb' | 'resort' | 'hostel'
 
 export type ActivityPreference = 
   | 'sightseeing'
